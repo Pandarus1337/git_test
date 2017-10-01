@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VibeTech Game Designs</title>
+<style>
+body {
+	background-color: gray;
+}
+canvas {
+	background-color: #f1f1f1;
+	display: block;
+	margin: auto;
+}
+</style>
+</head>
+
+
+<body onload="startGame()">
+<script>
+var background;
+var brian;
+var myScore;
+var light;
+var hiding = false;
+
+function startGame() {
+	background = new component(800, 500, "mgs.png", 0, 0, "background");
+	brian = new component(100,140,"brian.png",40,340,"image");
+	myScore = new component("30px","Consolas","white",280,40,"text");
+	light = new component(50,500,"yellow",600,0,"other");
+	myGameArea.start();
+}
+
+var myGameArea = {
+	canvas : document.createElement("canvas"),
+	start : function() {
+		this.canvas.width = 800;
+		this.canvas.height = 500;
+		this.context = this.canvas.getContext("2d");
+		document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+		this.frameNo = 0;
+		this.interval = setInterval(updateGameArea, 20);
+		window.addEventListener('keydown', function(e){
+			myGameArea.key = e.keyCode;
+		})
+		window.addEventListener('keyup', function(e){
+			myGameArea.key = false;
+		})
+	},
+	clear : function() {
+		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	},
+	stop : function(){
+		clearInterval(this.interval);
+	}
+}
+
+function component(width, height, source, x, y, type) {
+	this.type = type;
+	if (type == "image" || type == "background") {
+		this.image = new Image();
+		this.image.src = source;
+	}
+	this.score = 0;
+	this.width = width;
+	this.height = height;
+	this.speedX = 0;
+	this.speedY = 0;
+	this.x = x;
+	this.y = y;
+	this.update = function() {
+		ctx = myGameArea.context;
+		if (type == "image" || type == "background") {
+			ctx.drawImage(this.image,
+				this.x,
+				this.y,
+				this.width, this.height);
+			if (type == "background"){
+				ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
+			}
+		} else if (this.type == "text") {
+			ctx.font = this.width + " " + this.height;
+			ctx.fillStyle = source;
+			ctx.fillText(this.text, this.x, this.y);
+		} else {
+			ctx.fillStyle = source;
+			ctx.globalAlpha = 0.5;
+			ctx.fillRect(this.x, this.y, this.width, this.height);
+			ctx.globalAlpha = 1.0;
+		}
+	}
+	this.newPos = function() {
+		this.x += this.speedX;
+		this.y += this.speedY;
+		if (this.type == "background") {
+			if (this.x == -(this.width)) {
+				this.x = 0;
+			}
+		}
+		if (this.type == "other"){
+			if (this.x <= 0) {
+				this.x = 800;
+			}
+		}
+	}
+}
+
+function updateGameArea() {
+	myGameArea.clear();
+	myGameArea.frameNo += 1;
+	background.speedX = -0.5;
+	light.speedX = -5;
+
+	if (myGameArea.key && myGameArea.key == 32){
+		brian.image.src = "box.png";
+		background.speedX = 0;
+		hiding = true;
+	} else {
+		brian.image.src = "brian.png";
+		background.speedX = -0.5;
+		hiding = false;
+	}
+
+	if (light.x == 40 && !hiding){
+		window.alert("You got caught!");
+	}
+
+	background.newPos();
+	background.update();
+	brian.newPos();
+	brian.update();
+	light.newPos();
+	light.update();
+	myScore.text = "SCORE: " + myGameArea.frameNo;
+	myScore.update();
+}
+ 
+</script>
+
+<center>
+<div style="color:white; font-size:22px;">METAL GEAR SOLID GAME</div>
+<button onclick="window.location.href='Examples2.html'">NEXT GAME</button>
+</center>
+
+</body>
+</html>
